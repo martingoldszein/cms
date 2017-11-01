@@ -1,0 +1,64 @@
+<template>
+  <v-container>
+    <v-layout row wrap v-if="loading">
+      <v-flex xs12 class="text-xs-center">
+        <v-progress-circular
+          indeterminate
+          class="primary--text"
+          :width="7"
+          :size="70"></v-progress-circular>
+      </v-flex>
+    </v-layout>
+    <v-layout row wrap v-else>
+      <v-flex xs12>
+        <v-card>
+          <v-card-title>
+            <h6 class="primary--text">{{ obra.title }}</h6>
+            <template v-if="userIsCreator">
+              <v-spacer></v-spacer>
+              <app-edit-obra-details-dialog :obra="obra"></app-edit-obra-details-dialog>
+            </template>
+          </v-card-title>
+          <v-card-media
+            :src="obra.imageUrl"
+            height="400px"
+          ></v-card-media>
+          <v-card-text>
+            <div class="info--text">{{ obra.date | date }} - {{ obra.location }}</div>
+         
+            <div>{{ obra.description }}</div>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <app-obra-register-dialog
+              :obraId="obra.id"
+              v-if="userIsAuthenticated && !userIsCreator"></app-obra-register-dialog>
+          </v-card-actions>
+        </v-card>
+      </v-flex>
+    </v-layout>
+  </v-container>
+</template>
+
+<script>
+  export default {
+    props: ['id'],
+    computed: {
+      obra () {
+        return this.$store.getters.loadedObra(this.id)
+      },
+      userIsAuthenticated () {
+        return this.$store.getters.user !== null && this.$store.getters.user !== undefined
+      },
+      userIsCreator () {
+        if (!this.userIsAuthenticated) {
+          return false
+        }
+        return this.$store.getters.user.id === this.obra.creatorId
+      },
+      loading () {
+        return this.$store.getters.loading
+      }
+    }
+  }
+</script>
